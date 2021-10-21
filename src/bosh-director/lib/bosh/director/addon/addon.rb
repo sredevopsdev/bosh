@@ -8,20 +8,21 @@ module Bosh::Director
 
       attr_reader :name
 
-      def initialize(name, job_hashes, addon_include, addon_exclude, addon_level_properties)
+      def initialize(name, job_hashes, addon_include, addon_exclude, addon_level_properties, runtime_config_releases)
         @name = name
         @addon_job_hashes = job_hashes
         @addon_level_properties = addon_level_properties
         @addon_include = addon_include
         @addon_exclude = addon_exclude
         @links_parser = Bosh::Director::Links::LinksParser.new
+        @runtime_config_releases = runtime_config_releases
       end
 
       def jobs
         @addon_job_hashes
       end
 
-      def self.parse(addon_hash, addon_level = RUNTIME_LEVEL)
+      def self.parse(addon_hash, runtime_config_releases, addon_level = RUNTIME_LEVEL)
         name = safe_property(addon_hash, 'name', class: String)
         addon_job_hashes = safe_property(addon_hash, 'jobs', class: Array, default: [])
         parsed_addon_jobs = addon_job_hashes.map do |addon_job_hash|
@@ -33,7 +34,7 @@ module Bosh::Director
         Config.event_log.warn_deprecated("Top level 'properties' in addons are deprecated. Please define 'properties' at the job level.") if addon_hash.key?('properties')
         addon_level_properties = safe_property(addon_hash, 'properties', class: Hash, default: {})
 
-        new(name, parsed_addon_jobs, addon_include, addon_exclude, addon_level_properties)
+        new(name, parsed_addon_jobs, addon_include, addon_exclude, addon_level_properties, runtime_config_releases)
       end
 
       def applies?(deployment_name, deployment_teams, deployment_instance_group)
@@ -53,6 +54,10 @@ module Bosh::Director
         @addon_job_hashes.map do |addon|
           addon['release']
         end.uniq
+      end
+
+      def releases_in_use
+        @runtime_config_releases.filter { |release| releases.include?(release.name) }
       end
 
       def self.parse_and_validate_job(addon_job)

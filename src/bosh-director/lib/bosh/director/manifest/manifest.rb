@@ -82,7 +82,7 @@ module Bosh::Director
       return [] unless releases && applicable_releases
 
       releases.select do |release|
-        applicable_releases.any? { |applicable_release| applicable_release.name == release['name'] }
+        applicable_releases.any? { |applicable_release| applicable_release.name == release['name'] && applicable_release.version == release['version'] }
       end
     end
 

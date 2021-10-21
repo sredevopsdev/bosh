@@ -12,7 +12,7 @@ module Bosh::Director
       def parse
         raw_addons = safe_property(@manifest, 'addons', :class => Array, :default => [])
         raw_addons.inject([]) do |parsed_addons, addon_hash|
-          parsed_addon = Bosh::Director::Addon::Addon.parse(addon_hash, @addon_level)
+          parsed_addon = Bosh::Director::Addon::Addon.parse(addon_hash, @releases, @addon_level)
           validate(parsed_addon)
           parsed_addons << parsed_addon
         end

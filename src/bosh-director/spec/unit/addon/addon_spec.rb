@@ -3,7 +3,7 @@ require 'spec_helper'
 module Bosh::Director
   module Addon
     describe Addon, truncation: true do
-      subject(:addon) { Addon.new(addon_name, jobs, includes, excludes, addon_properties) }
+      subject(:addon) { Addon.new(addon_name, jobs, includes, excludes, addon_properties, runtime_config_releases) }
       let(:addon_name) { 'addon-name' }
 
       let(:jobs) do
@@ -87,6 +87,8 @@ module Bosh::Director
 
       let(:exclude_spec) { nil }
       let(:include_spec) { nil }
+
+      let(:runtime_config_releases) { [] }
 
       describe '#add_to_deployment' do
         let(:include_spec) do
@@ -367,14 +369,15 @@ module Bosh::Director
             it 'defaults to an empty hash' do
               allow(Addon).to receive(:new)
 
-              Addon.parse(addon_hash)
+              Addon.parse(addon_hash, runtime_config_releases)
 
               expect(Addon).to have_received(:new).with(
                 'addon-name',
                 [],
                 an_instance_of(Filter),
                 an_instance_of(Filter),
-                {}
+                {},
+                runtime_config_releases,
               )
             end
           end
@@ -385,14 +388,15 @@ module Bosh::Director
             it 'passes them through to the addon' do
               allow(Addon).to receive(:new)
 
-              Addon.parse(addon_hash)
+              Addon.parse(addon_hash, runtime_config_releases)
 
               expect(Addon).to have_received(:new).with(
                 'addon-name',
                 [],
                 an_instance_of(Filter),
                 an_instance_of(Filter),
-                'property1' => 'value1',
+                { 'property1' => 'value1' },
+                runtime_config_releases,
               )
             end
           end
@@ -414,7 +418,7 @@ module Bosh::Director
           it 'returns addon' do
             expect(Filter).to receive(:parse).with(include_hash, :include, RUNTIME_LEVEL)
             expect(Filter).to receive(:parse).with(nil, :exclude, RUNTIME_LEVEL)
-            addon = Addon.parse(addon_hash)
+            addon = Addon.parse(addon_hash, runtime_config_releases)
             expect(addon.name).to eq('addon-name')
             expect(addon.jobs.count).to eq(2)
             expect(addon.jobs.map { |job| job['name'] }).to eq(%w[dummy_with_properties dummy_with_package])
@@ -427,7 +431,7 @@ module Bosh::Director
           end
 
           it 'returns addon' do
-            addon = Addon.parse(addon_hash)
+            addon = Addon.parse(addon_hash, runtime_config_releases)
             expect(addon.name).to eq('addon-name')
             expect(addon.jobs.count).to eq(0)
           end
@@ -440,7 +444,7 @@ module Bosh::Director
 
           it 'errors' do
             error_string = "Required property 'name' was not specified in object ({\"jobs\"=>[\"addon-name\"]})"
-            expect { Addon.parse(addon_hash) }.to raise_error(ValidationMissingField, error_string)
+            expect { Addon.parse(addon_hash, runtime_config_releases) }.to raise_error(ValidationMissingField, error_string)
           end
         end
       end
@@ -680,6 +684,26 @@ module Bosh::Director
 
           it 'should return an empty array of releases' do
             expect(addon.releases).to be_empty
+          end
+        end
+      end
+
+      describe '#releases_in_use' do
+        let(:dummy_release) { instance_double(Bosh::Director::RuntimeConfig::Release, name: 'dummy') }
+        let(:unused_release) { instance_double(Bosh::Director::RuntimeConfig::Release, name: 'unused') }
+        let(:runtime_config_releases) { [dummy_release, unused_release] }
+
+        it 'should only return unique releases' do
+          expect(addon.releases_in_use).to match_array([dummy_release])
+        end
+
+        context 'there are no jobs' do
+          let(:jobs) do
+            []
+          end
+
+          it 'should return an empty array of releases' do
+            expect(addon.releases_in_use).to be_empty
           end
         end
       end

@@ -19,9 +19,9 @@ module Bosh::Director
 
       def get_applicable_releases(deployment_plan)
         get_applicable_addons(deployment_plan).flat_map do |addon|
-          addon.releases.flat_map do |release_name|
+          addon.releases_in_use.flat_map do |addon_release|
             @releases.select do |release|
-              release.name == release_name
+              release.name == addon_release.name && release.version === addon_release.version
             end
           end
         end.uniq

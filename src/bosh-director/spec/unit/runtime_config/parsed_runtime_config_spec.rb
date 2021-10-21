@@ -19,6 +19,7 @@ module Bosh::Director::RuntimeConfig
     let(:releases) do
       [
         instance_double(Bosh::Director::RuntimeConfig::Release, name: 'derpy', version: '1'),
+        instance_double(Bosh::Director::RuntimeConfig::Release, name: 'derpy', version: '2'),
         instance_double(Bosh::Director::RuntimeConfig::Release, name: 'burpy', version: '2'),
         instance_double(Bosh::Director::RuntimeConfig::Release, name: 'not_used', version: '99'),
       ]
@@ -46,15 +47,24 @@ module Bosh::Director::RuntimeConfig
 
     context '#get_applicable_releases' do
       let(:applicable_addon_1) do
-        instance_double(Bosh::Director::Addon::Addon, releases: ['derpy'], applies?: true)
+        instance_double(Bosh::Director::Addon::Addon,
+          releases_in_use: [instance_double(Bosh::Director::RuntimeConfig::Release, name: 'derpy', version: '1')],
+          applies?: true
+        )
       end
 
       let(:applicable_addon_2) do
-        instance_double(Bosh::Director::Addon::Addon, releases: ['derpy'], applies?: true)
+        instance_double(Bosh::Director::Addon::Addon,
+          releases_in_use: [instance_double(Bosh::Director::RuntimeConfig::Release, name: 'derpy', version: '1')],
+          applies?: true
+        )
       end
 
       let(:not_applicable_addon) do
-        instance_double(Bosh::Director::Addon::Addon, releases: ['burpy'], applies?: false)
+        instance_double(Bosh::Director::Addon::Addon,
+          releases_in_use: [instance_double(Bosh::Director::RuntimeConfig::Release, name: 'burpy', version: '2')],
+          applies?: false
+        )
       end
 
       let(:addons) do
