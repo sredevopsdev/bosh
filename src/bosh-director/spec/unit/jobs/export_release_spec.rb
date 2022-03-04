@@ -357,8 +357,8 @@ module Bosh::Director
 
           it 'creates a manifest file that contains the sha1, fingerprint and blobstore_id' do
             allow(archiver).to receive(:compress) { |download_dir, sources, output_path|
-              manifest_hash = YAML.load_file(File.join(download_dir, 'release.MF'))
-              expected_manifest_hash = YAML.load(%q(---
+              manifest_hash = YamlHelper.load_file(File.join(download_dir, 'release.MF'))
+              expected_manifest_hash = YamlHelper.load(%q(---
 compiled_packages:
 - name: postgres
   version: postgres_version
@@ -475,8 +475,8 @@ version: 0.1-dev
 
           it 'creates a manifest file that contains the sha1, fingerprint and blobstore_id' do
             allow(archiver).to receive(:compress) { |download_dir, sources, output_path|
-              manifest_hash = YAML.load_file(File.join(download_dir, 'release.MF'))
-              expected_manifest_hash = YAML.load(%q(---
+              manifest_hash = YamlHelper.load_file(File.join(download_dir, 'release.MF'))
+              expected_manifest_hash = YamlHelper.load(%q(---
 compiled_packages:
 - name: postgres
   version: postgres_version

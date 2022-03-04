@@ -129,7 +129,7 @@ module Bosh::Director
     describe 'class methods' do
       include FakeFS::SpecHelpers
       let(:config_path) { asset('test-director-config.yml') }
-      let(:config) { YAML.load_file(config_path) }
+      let(:config) { YamlHelper.load_file(config_path) }
 
       before do
         configure_fake_config_files(config_path)

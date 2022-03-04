@@ -421,7 +421,7 @@ module Bosh::Director
       end
 
       def load_file(path)
-        Config.new(YAML.load_file(path))
+        Config.new(YamlHelper.load_file(path))
       end
 
       def load_hash(hash)

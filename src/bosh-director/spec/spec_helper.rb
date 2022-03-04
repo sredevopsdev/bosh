@@ -68,7 +68,7 @@ module SpecHelper
     end
 
     def spec_get_director_config
-      config = YAML.load_file(File.expand_path('assets/test-director-config.yml', File.dirname(__FILE__)))
+      config = YamlHelper.load_file(File.expand_path('assets/test-director-config.yml', File.dirname(__FILE__)))
 
       config['nats']['server_ca_path'] = File.expand_path('assets/nats/nats_ca.pem', File.dirname(__FILE__))
       config['nats']['client_ca_certificate_path'] = File.expand_path(

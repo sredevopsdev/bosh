@@ -1326,7 +1326,7 @@ module Bosh::Director
 
             expect(last_response.status).to eq(200)
             body = JSON.parse(last_response.body)
-            expect(YAML.load(body['manifest'])).to eq('foo' => 'bar')
+            expect(YamlHelper.load(body['manifest'])).to eq('foo' => 'bar')
           end
         end
 

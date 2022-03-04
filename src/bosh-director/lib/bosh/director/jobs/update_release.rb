@@ -86,7 +86,7 @@ module Bosh::Director
         manifest_file = File.join(release_dir, 'release.MF')
         raise ReleaseManifestNotFound, 'Release manifest not found' unless File.file?(manifest_file)
 
-        @manifest = YAML.load_file(manifest_file)
+        @manifest = YamlHelper.load_file(manifest_file)
 
         # handle compiled_release case
         @compiled_release = !!@manifest['compiled_packages']
